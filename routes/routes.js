@@ -918,7 +918,7 @@ module.exports = function(app) {
     app.post('/api/rejectEpaper', function(req, res) {
         console.log('id: ' + req.body.id);
 
-        //> update epapre
+        //> update dbEpaper
         dbEpaper.findById(req.body.id, function(err, paper) {
             if(err || !paper)
             {
