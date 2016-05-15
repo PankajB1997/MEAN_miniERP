@@ -1,0 +1,32 @@
+<h4>
+    <ul>
+        <li style="margin: 20px 0">狀態: {{ngCtrl.currentEpaper.status | statusName}}</li>
+        <li style="margin: 20px 0">類別: 假單</li>
+        <li style="margin: 20px 0">假別: {{ngCtrl.currentEpaper.data.leaveIdx | leaveName: ngCtrl.leaveData}}</li>
+        <li style="margin: 20px 0">申請者: {{ngCtrl.currentEpaper.applicant}}</li>
+        <li style="margin: 20px 0">申請日期: {{ngCtrl.currentEpaper.date | date: "yyyy-MM-dd"}}</li>
+        <li style="margin: 20px 0">請假日期: {{ngCtrl.currentEpaper.data.startDate | date: "yyyy-MM-dd"}}
+            {{ngCtrl.currentEpaper.data.startTime}}&nbsp;&nbsp;到&nbsp;&nbsp;
+            {{ngCtrl.currentEpaper.data.endDate | date: "yyyy-MM-dd"}}
+            {{ngCtrl.currentEpaper.data.endTime}}
+        </li>
+        <li style="margin: 20px 0">請假天數: {{ngCtrl.currentEpaper.data.period}}</li>
+        <li style="margin: 20px 0">代理人: {{ngCtrl.currentEpaper.approver[0].name ? ngCtrl.currentEpaper.approver[0].name : "無"}}</li>
+        <table class="table table-striped">
+            <thead class="h4">
+                <tr>
+                    <th class="text-center">簽核人</th>
+                    <th class="text-center">狀態</th>
+                    <th class="text-center">日期</th>
+                </tr>
+            </thead>
+            <tbody class="text-center h4">
+                <tr ng-repeat="item in ngCtrl.currentEpaper.record">
+                    <td>{{item.name}}</td>
+                    <td>{{item.status}}</td>
+                    <td>{{item.date | date: "yyyy-MM-dd"}}</td>
+                 </tr>
+            </tbody>
+        </table>
+    </ul>
+</h4>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html ng-app='myAuth'>
+<head>
+    <%- include header %>
+    <!-- library -->
+    <script src="../components/angular-md5/angular-md5.min.js"></script>
+    <script src="../javascript/login.js"></script>
+</head>
+<body style="padding-top: 2%" ng-controller="AuthController as ngCtrl">
+    <%- include nav %>
+    <section class="container">
+        <h1 class="page-header text-center">登入</h1>
+        <center>
+            <h3><label class="label label-danger" ng-show="ngCtrl.haveError">Email或密碼輸入錯誤</label></h3>
+            <section class="input-group col-md-4">
+                <label class="sr-only">email</label>
+                <input type="text" class="form-control" placeholder="email" ng-model="ngCtrl.email" />
+                <span class="input-group-addon" id="email-addon">@kk.com</span>
+            </section>
+            <br />
+            <section class="input-group col-md-4">
+                <label class="sr-only">password</label>
+                <input type="password" class="form-control" placeholder="password" ng-model="ngCtrl.password" required />
+            </section>
+            <br />
+            <button type="submit" class="btn btn-primary" ng-disabled="ngCtrl.disableLogin()" ng-click="ngCtrl.login()">Login</button>
+        </center>
+    </section>
+</body>
+</html>

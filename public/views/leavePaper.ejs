@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html ng-app="myLeavePaper">
+<head>
+    <%- include header %>
+    <!-- library -->
+	<script src="../components/angular-animate/angular-animate.min.js"></script>
+    <script src="../components/angular-aria/angular-aria.min.js"></script>
+    <script src="../components/angular-messages/angular-messages.min.js"></script>
+    <script src="../components/angular-material/angular-material.min.js"></script>
+    <script src="../components/moment/min/moment.min.js"></script>
+    <script src="../components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+    <script src="../components/angular-sanitize/angular-sanitize.min.js"></script>
+    <script src="../javascript/leavePaper.js"></script>
+    <!-- style sheet -->
+    <link rel="stylesheet" href="../components/angular-material/angular-material.min.css">
+</head>
+<body style="padding-top: 2%" ng-controller="LeaveController as ngCtrl">
+	<%- include nav %>
+    <section class="container">
+    	<h1 class="page-header text-center">請假假單</h1>
+    	<table class="table table-striped" style="width: auto !important" align="center">
+    		<thead class="h4">
+    			<tr>
+    				<th class="text-center">假別</th>
+    				<th class="text-center">總天數</th>
+    				<th class="text-center">已用天數</th>
+    				<th class="text-center">剩餘天數</th>
+    			</tr>
+    		</thead>
+    		<tbody class="text-center h5">
+    			<tr ng-repeat="item in ngCtrl.leaveData.name">
+    				<td>{{item}}</td>
+    				<td>{{ngCtrl.myLeaveQuota.total[$index]}}</td>
+    				<td>{{ngCtrl.myLeaveQuota.used[$index]}}</td>
+    				<td>{{ngCtrl.myLeaveQuota.total[$index] - ngCtrl.myLeaveQuota.used[$index]}}</td>
+    			</tr>
+    		</tbody>
+	    </table>
+    	<form class="form-inline" role="form">
+        <center>
+    		<section class="form-group">
+				<label for="leaveCategory" class="control-label" style="font-size: 18px">假別 :</label>
+				<select class="form-control" id="leaveCategory" ng-model="ngCtrl.myLeaveName" ng-change="ngCtrl.getLeaveInfo(ngCtrl.calPeriod)" ng-options="item for item in ngCtrl.leaveData.name">
+					<option value="">--請選擇--</option>
+				</select>
+			</section>
+        </center>
+        </form>
+		<center>
+            <br />
+			{{ngCtrl.myLeaveInfo}}
+            <br /><br />
+		</center>
+    	<section ng-show="ngCtrl.checkVisible(ngCtrl.checkEnum.CHECK_LEAVE_NAME)">
+			<form class="form-inline" role="form">
+                <center>
+    				<section class="form-group">
+    					<label for="startDate" class="control-label" style="font-size: 18px">From:</label>
+    					<md-datepicker md-date-filter="ngCtrl.weekendFilter" ng-model="ngCtrl.myLeaveStartDate" ng-change="ngCtrl.setMinDate(ngCtrl.calPeriod)"></md-datepicker>
+    					<select class="form-control" id="startTime" ng-model="ngCtrl.myLeaveStartTime" ng-change="ngCtrl.calPeriod()" ng-options="item.name for item in ngCtrl.leaveTime">
+    						<option value="">--請選擇--</option>
+    					</select>
+    				</section>
+                    &nbsp;&nbsp;&nbsp;
+    				<section class="form-group">
+    					<label for="endDate" class="control-label" style="font-size: 18px">To:</label>
+    					<md-datepicker md-min-date="ngCtrl.minDate" md-date-filter="ngCtrl.weekendFilter" ng-model="ngCtrl.myLeaveEndDate" ng-change="ngCtrl.calPeriod()"></md-datepicker>
+    					<select class="form-control" id="endTime" ng-model="ngCtrl.myLeaveEndTime" ng-change="ngCtrl.calPeriod()" ng-options="item.name for item in ngCtrl.leaveTime">
+    						<option value="">--請選擇--</option>
+    					</select>
+    				</section>
+                </center>
+			</form>
+			<section class="text-center">
+				<br />
+                {{ngCtrl.quotaMessage}}
+                <br /><br />
+			</section>
+			<section>
+				<form class="form-horizontal" role="form">
+		    		<section class="form-group">
+                        <label for="approver" class="col-md-1 col-md-offset-4 control-label" style="font-size: 18px">簽核人 :</label>
+                        <section class="col-md-2 input-group">
+                            <input type="text" id="approver" class="form-control" ng-model="ngCtrl.myLeaveApprover" uib-typeahead="item.email for item in ngCtrl.employeesData | filter:$viewValue | limitTo:8" >
+                        </section>
+                    </section>
+		    		<section class="form-group" ng-show="ngCtrl.checkDeputy()">
+		    			<label for="deputy" class="col-md-1 col-md-offset-4 control-label" style="font-size: 18px">代理人 :</label>
+                        <section class="col-md-2 input-group">
+                            <input type="text" id="deputy" class="form-control" ng-model="ngCtrl.myLeaveDeputy" uib-typeahead="item.email for item in ngCtrl.employeesData | filter:$viewValue | limitTo:8" >
+                        </section>
+		    		</section>
+		    	</form>
+			</section>
+			<section class="col-md-2 col-md-offset-5">
+				<form role="form" ng-submit="ngCtrl.submitLeavePaper()">
+					<button type="submit" class="btn btn-primary col-xs-offset-1" ng-disabled="!ngCtrl.checkSubmit()">submit</button>
+					<a class="btn btn-danger" href="/">cancel</a>
+				</form>
+			</section>
+		</section>
+    </section>
+</body>
+</html>

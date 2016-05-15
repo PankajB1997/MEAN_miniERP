@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html ng-app='myAdminManage'>
+<head>
+    <%- include header %>
+    <!-- library -->
+    <script src="../components/angular-animate/angular-animate.min.js"></script>
+    <script src="../components/angular-aria/angular-aria.min.js"></script>
+    <script src="../components/angular-messages/angular-messages.min.js"></script>
+    <script src="../components/angular-material/angular-material.min.js"></script>
+    <script src="../components/moment/min/moment.min.js"></script>
+    <script src="../components/angular-md5/angular-md5.min.js"></script>
+    <script src="../javascript/adminManage.js"></script>
+    <!-- style sheet -->
+    <link rel="stylesheet" href="../components/angular-material/angular-material.min.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body ng-controller="ManageController as ngCtrl">
+    <%- include nav %>
+    <section class="container-fluid">
+        <!-- sidebar -->
+        <section class="col-md-2 text-center sidebar">
+            <section class="nav nav-sidebar">
+                <li><a href="" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.OVERVIEW_PAGE)">管理首頁</a></li>
+                <li><a href="" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.EMPLOYEE_PAGE)">人員管理</a></li>
+                <li><a href="" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.LEAVE_PAGE)">請假管理</a></li>
+            </section>
+        </section>
+        <!-- main part -->
+        <section class="col-md-9 col-md-offset-2 main">
+            <!-- overview page -->
+            <section ng-show="ngCtrl.showPage(ngCtrl.pageEnum.OVERVIEW_PAGE)">
+                <h1 class="page-header">管理首頁</h1>
+                <p>
+                    <h4 class="text-danger">
+                    系統管理功能，只開放有管理權限的人員<br />
+                    修改的資料會直接進到資料庫，請小心使用
+                    </h4>
+                </p>
+                <br />
+                <h3 class="page-header text-info">管理人員列表</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th class="text-center">姓名</th>
+                            <th class="text-center">Email</th>
+                            <th class="text-center">部門</th>
+                            <th class="text-center">職稱</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        <tr ng-repeat="item in ngCtrl.employeesData">
+                            <td ng-if="item.admin">{{item.name}}</td>
+                            <td ng-if="item.admin">{{item.email}}@kk.com</td>
+                            <td ng-if="item.admin">{{item.department}}</td>
+                            <td ng-if="item.admin">{{item.title}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            <!-- employee management -->
+            <section ng-show="ngCtrl.showPage(ngCtrl.pageEnum.EMPLOYEE_PAGE)">
+                <!-- enployee main page -->
+                <section ng-show="ngCtrl.showPage(ngCtrl.pageEnum.EMPLOYEE_MAIN_PAGE)">
+                    <h1 class="page-header">人員管理</h1>
+                    <md-tabs md-selected="ngCtrl.empViewPageIdx" md-align-tabs="top" md-dynamic-height="">
+                        <md-tab label="基本資料">
+                            <md-tab-body>
+                                <br><br>
+                                <label for="empSearchName">搜尋：</label>
+                                <input type="text" name="empSearchName" ng-model="ngCtrl.empSearchObj" placeholder="search" />
+                                <button type="button" class="btn btn-info" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.EMPLOYEE_ADD_PAGE_1)">新增人員</button>
+                                <br><br>
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">姓名</th>
+                                            <th class="text-center">Email</th>
+                                            <th class="text-center">部門</th>
+                                            <th class="text-center">職稱</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-center">
+                                        <tr ng-repeat="item in ngCtrl.employeesData | filter: ngCtrl.empSearchObj track by item._id">
+                                            <td>{{item.name}}</td>
+                                            <td>{{item.email}}@kk.com</td>
+                                            <td>{{item.department}}</td>
+                                            <td>{{item.title}}</td>
+                                            <td><button type="button" class="btn btn-default" ng-click="ngCtrl.setEmpBasicViewPage(item.email)">檢視</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </md-tab-body>
+                        </md-tab>
+                        <md-tab label="部門管理">
+                            <md-tab-body>
+                                <br><br>
+                                <button type="button" class="btn btn-info" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.EMPLOYEE_ADD_DEP_PAGE)">新增部門</button>
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">部門</th>
+                                            <th class="text-center">人數</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-center">
+                                        <tr ng-repeat="item in ngCtrl.departmentData track by item.name">
+                                            <td>{{item.name}}</td>
+                                            <td>{{item.member.length}}</td>
+                                            <td>
+                                                <button type="button" class="btn btn-default" ng-click="ngCtrl.setDepViewPage(item.name,ngCtrl.pageEnum.EMPLOYEE_VIEW_DEP_PAGE)">檢視</button>
+                                                <button type="button" class="btn btn-default" ng-click="ngCtrl.setDepViewPage(item.name,ngCtrl.pageEnum.EMPLOYEE_MODIFY_DEP_PAGE)">修改</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </md-tab-body>
+                        </md-tab>
+                    </md-tabs>
+                </section>
+                <!-- employee viewing page -->
+                <section ng-show="ngCtrl.showPage(ngCtrl.pageEnum.EMPLOYEE_VIEW_PAGE)">
+                    <h1 class="page-header">{{ngCtrl.currentEmployee.name}}</h1>
+                    <h4>
+                        <ul>
+                            <li style="margin: 20px 0">Email: {{ngCtrl.currentEmployee.email}}@kk.com</li>
+                            <li style="margin: 20px 0">性別: {{ngCtrl.currentEmployee.sex}}</li>
+                            <li style="margin: 20px 0">部門: {{ngCtrl.currentEmployee.department}}</li>
+                            <li style="margin: 20px 0">職稱: {{ngCtrl.currentEmployee.title}}</li>
+                            <li style="margin: 20px 0">到職日: {{ngCtrl.currentEmployee.onBoardDate | date: "yyyy-MM-dd"}}</li>
+                            <li style="margin: 20px 0">管理者: {{(ngCtrl.currentEmployee.admin)? "是" : "不是"}}</li>
+                            <button type="button" class="btn btn-info" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.EMPLOYEE_MODIFY_BASIC_PAGE)">更新</button>
+                            <button type="button" class="btn btn-danger" ng-click="ngCtrl.deleteEmployee($event)">刪除</button>
+                            <button type="button" class="btn btn-default" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.EMPLOYEE_MAIN_PAGE)">返回</button>
+                        </ul>
+                    </h4>
+                </section>
+                <!-- employee basic info modifying page -->
+                <section ng-show="ngCtrl.showPage(ngCtrl.pageEnum.EMPLOYEE_MODIFY_BASIC_PAGE)">
+                    <h1 class="page-header">{{ngCtrl.currentEmployee.name}}-更新資料</h1>
+                    <form class="form-horizontal" ng-submit="ngCtrl.updateEmpBasicSubmit()">
+                        <section class="form-group">
+                            <label for="name" class="col-md-2 control-label">姓名 :</label>
+                            <section class="col-md-2 input-group">
+                                <input type="text" class="form-control" id="name" ng-model="ngCtrl.currentEmployee.name" ng-change="ngCtrl.employeeDataChange()">
+                            </section>
+                        </section>
+                        <section class="form-group">
+                            <label for="email" class="col-md-2 control-label">Email :</label>
+                            <section class="col-md-2 input-group">
+                                <input type="text" class="form-control" id="email" ng-model="ngCtrl.currentEmployee.email" ng-change="ngCtrl.employeeDataChange()">
+                                <span class="input-group-addon" id="email-addon">@kk.com</span>
+                            </section>
+                        </section>
+                        <section class="form-group">
+                            <label class="col-md-2 control-label">性別 :</label>
+                            <section class="col-md-2">
+                                <label class="radio-inline">
+                                    <input type="radio" value="male" ng-model="ngCtrl.currentEmployee.sex" ng-change="ngCtrl.employeeDataChange()">Male
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" value="female" ng-model="ngCtrl.currentEmployee.sex" ng-change="ngCtrl.employeeDataChange()">Female
+                                </label>
+                            </section>
+                        </section>
+                        <section class="form-group">
+                            <label for="department" class="col-md-2 control-label">部門 :</label>
+                            <section class="col-md-2 input-group">
+                                <select class="form-control" id="department" ng-model="ngCtrl.currentEmployee.department" ng-change="ngCtrl.employeeDataChange()" ng-options="item.name as item.name for item in ngCtrl.departmentData" >
+                                    <option value="">--請選擇--</option>
+                                </select>
+                            </section>
+                        </section>
+                        <section class="form-group">
+                            <label for="title" class="col-md-2 control-label">職稱 :</label>
+                            <section class="col-md-2 input-group">
+                                <input type="text" class="form-control" id="title" ng-model="ngCtrl.currentEmployee.title" ng-change="ngCtrl.employeeDataChange()">
+                            </section>
+                        </section>
+                        <section class="form-group">
+                            <label for="onBoardDate" class="col-md-2 control-label">到職日 :</label>
+                            <md-datepicker id="onBoardDate" md-date-filter="ngCtrl.weekendFilter" ng-model="ngCtrl.currentEmployee.onBoardDate" ng-change="ngCtrl.employeeDataChange()"></md-datepicker>
+                        </section>
+                        <section class="form-group">
+                            <section class="col-md-2 col-md-offset-2">
+                                <section class="checkbox">
+                                    <label>
+                                        <input type="checkbox" ng-model="ngCtrl.currentEmployee.admin" ng-change="ngCtrl.employeeDataChange()">有管理權限
+                                    </label>
+                                </section>
+                            </section>
+                        </section>
+                        <section class="form-group">
+                            <section class="col-md-2 col-md-offset-2">
+                                <button type="submit" class="btn btn-info" ng-disabled="ngCtrl.checkDataChanged()">更新</button>
+                                <button type="button" class="btn btn-default" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.EMPLOYEE_MAIN_PAGE)">取消</button>
+                            </section>
+                        </section>
+                    </form>
+                </section>
+                <!-- employee adding page1 -->
+                <section ng-show="ngCtrl.showPage(ngCtrl.pageEnum.EMPLOYEE_ADD_PAGE_1)">
+                    <h1 class="page-header">人員管理 - 新增人員</h1>
+                    <form class="form-horizontal">
+                        <section class="form-group">
+                            <label for="newName" class="col-md-2 control-label">姓名 :</label>
+                            <section class="col-md-2 input-group">
+                                <input type="text" class="form-control" id="newName" placeholder="中文姓名" ng-model="ngCtrl.newEmployee.name">
+                            </section>
+                        </section>
+                        <section class="form-group">
+                            <label for="newEmail" class="col-md-2 control-label">Email :</label>
+                            <section class="col-md-2 input-group">
+                                <input type="text" class="form-control" id="newEmail" placeholder="Email" ng-model="ngCtrl.newEmployee.email"/>
+                                <span class="input-group-addon" id="email-addon">@kk.com</span>
+                            </section>
+                        </section>
+                        <section class="form-group">
+                            <label for="newPw" class="col-md-2 control-label">Password :</label>
+                            <section class="col-md-2 input-group">
+                                <input type="text" class="form-control" id="newPw" placeholder="預設密碼" ng-model="ngCtrl.newEmployee.password">
+                            </section>
+                        </section>
+                        <section class="form-group">
+                            <label class="col-md-2 control-label">性別 :</label>
+                            <section class="col-md-2">
+                                <label class="radio-inline">
+                                    <input type="radio" value="male" ng-model="ngCtrl.newEmployee.sex">Male
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" value="female" ng-model="ngCtrl.newEmployee.sex">Female
+                                </label>
+                            </section>
+                        </section>
+                        <section class="form-group">
+                            <label for="newDepartment" class="col-md-2 control-label">部門 :</label>
+                            <section class="col-md-2 input-group">
+                                <select class="form-control" id="newDepartment" ng-model="ngCtrl.newEmployee.department" ng-options="item.name as item.name for item in ngCtrl.departmentData">
+                                    <option value="">--請選擇--</option>
+                                </select>
+                            </section>
+                        </section>
+                        <section class="form-group">
+                            <label for="newTitle" class="col-md-2 control-label">職稱 :</label>
+                            <section class="col-md-2 input-group">
+                                <input type="text" class="form-control" id="newTitle" ng-model="ngCtrl.newEmployee.title">
+                            </section>
+                        </section>
+                        <section class="form-group">
+                            <label for="newOnBoardDate" class="col-md-2 control-label">到職日 :</label>
+                            <md-datepicker id="newOnBoardDate" md-date-filter="ngCtrl.weekendFilter" ng-model="ngCtrl.newEmployee.onBoardDate"></md-datepicker>
+                        </section>
+                        <section class="form-group">
+                            <section class="col-md-2 col-md-offset-2">
+                                <section class="checkbox">
+                                    <label>
+                                        <input type="checkbox" ng-model="ngCtrl.newEmployee.admin">有管理權限
+                                    </label>
+                                </section>
+                            </section>
+                        </section>
+                        <section class="form-group">
+                            <section class="col-md-2 col-md-offset-2">
+                                <button type="button" class="btn btn-info" ng-disabled="!ngCtrl.checkAddEmployeeStep1()" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.EMPLOYEE_ADD_PAGE_2)">下一步</button>
+                                <button type="button" class="btn btn-default" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.EMPLOYEE_MAIN_PAGE)">取消</button>
+                            </section>
+                        </section>
+                    </form>
+                </section>
+                <!-- employee adding page2 -->
+                <section ng-show="ngCtrl.showPage(ngCtrl.pageEnum.EMPLOYEE_ADD_PAGE_2)">
+                    <h1 class="page-header">人員管理 - 新增人員</h1>
+                    <form class="form-horizontal" ng-submit="ngCtrl.addEmployeeSubmit()">
+                        <section class="form-group" ng-repeat="item in ngCtrl.leaveData.name">
+                            <label for="newLeaveQuota" class="col-md-2 control-label">{{item}}</label>
+                            <section class="col-md-2 input-group">
+                                <input type="number" class="form-control" id="newLeaveQuota" placeholder="天數" ng-model='ngCtrl.newLeaveQuota[$index]'>
+                            </section>
+                        </section>
+                        <section class="form-group">
+                            <section class="col-md-2 col-md-offset-2">
+                                <button type="submit" class="btn btn-info" ng-disabled="ngCtrl.checkAddEmployeeSubmit()">新增</button>
+                                <button type="button" class="btn btn-default" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.EMPLOYEE_ADD_PAGE_1)">上一步</button>
+                                <button type="button" class="btn btn-default" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.EMPLOYEE_MAIN_PAGE)">取消</button>
+                            </section>
+                        </section>
+                    </form>
+                </section>
+                <!-- department adding page -->
+                <section ng-show="ngCtrl.showPage(ngCtrl.pageEnum.EMPLOYEE_ADD_DEP_PAGE)">
+                    <h1 class="page-header">部門管理 - 新增部門</h1>
+                    <form class="form-horizontal" ng-submit="ngCtrl.addDepartmentSubmit()">
+                        <section class="form-group">
+                            <label for="newDepName" class="col-md-2 control-label">部門名稱</label>
+                            <section class="col-md-4 input-group">
+                                <input type="text" class="form-control" id="newDepName" ng-model="ngCtrl.newDepartmentName">
+                            </section>
+                        </section>
+                        <section class="form-group">
+                            <section class="col-md-2 col-md-offset-2">
+                                <button type="submit" class="btn btn-info" ng-disabled="!ngCtrl.checkAddDepSubmit()">新增</button>
+                                <button type="button" class="btn btn-default" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.EMPLOYEE_MAIN_PAGE)">取消</button>
+                            </section>
+                        </section>
+                    </form>
+                </section>
+                <!-- department viewing page -->
+                <section ng-show="ngCtrl.showPage(ngCtrl.pageEnum.EMPLOYEE_VIEW_DEP_PAGE)">
+                    <h1 class="page-header">{{ngCtrl.currentDep.name}} 部門</h1>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th class="text-center">成員</th>
+                                <th class="text-center">職稱</th>
+                                <th class="text-center">email</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center">
+                            <tr ng-repeat="item in ngCtrl.currentDep.member">
+                                <td>{{item}}</td>
+                                <td>{{ngCtrl.currentDep.title[$index]}}</td>
+                                <td>{{ngCtrl.currentDep.email[$index]}}@kk.com</td>
+                                <td><button type="button" class="btn btn-default" ng-click="ngCtrl.setEmpBasicViewPage(ngCtrl.currentDep.email[$index])">檢視</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <section class="col-md-1">
+                        <button type="button" class="btn btn-default" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.EMPLOYEE_MAIN_PAGE)">返回</button>
+                    </section>
+                </section>
+                <!-- department viewing page -->
+                <section ng-show="ngCtrl.showPage(ngCtrl.pageEnum.EMPLOYEE_MODIFY_DEP_PAGE)">
+                    <h1 class="page-header">{{ngCtrl.currentDep.name}}</h1>
+                    <form class="form-horizontal" ng-submit="ngCtrl.updateDepSubmit($event)">
+                        <section class="form-group">
+                            <label for="depName" class="col-md-2 control-label">部門名稱</label>
+                            <section class="col-md-4 input-group">
+                                <input type="text" class="form-control" id="depName" ng-model="ngCtrl.currentDep.name" ng-change="ngCtrl.employeeDataChange()">
+                            </section>
+                        </section>
+                        <section class="form-group">
+                            <section class="col-md-3 col-md-offset-2">
+                                <button type="submit" class="btn btn-info" ng-disabled="ngCtrl.checkDataChanged()">更新</button>
+                                <button type="button" class="btn btn-danger" ng-click="ngCtrl.deleteDepartment($event)">刪除</button>
+                                <button type="button" class="btn btn-default" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.EMPLOYEE_MAIN_PAGE)">取消</button>
+                            </section>
+                        </section>
+                    </form>
+                </section>
+            </section>
+            <!-- leave management -->
+            <section ng-show="ngCtrl.showPage(ngCtrl.pageEnum.LEAVE_PAGE)">
+                <!-- leave main page -->
+                <section ng-show="ngCtrl.showPage(ngCtrl.pageEnum.LEAVE_MAIN_PAGE)">
+                    <h1 class="page-header">請假管理</h1>
+                    <md-tabs md-selected="ngCtrl.leaveViewIdx" md-align-tabs="top" md-dynamic-height="">
+                        <md-tab label="假別管理">
+                            <md-tab-body>
+                                <br><br>
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">假別</th>
+                                            <th class="text-center">說明</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-center">
+                                        <tr ng-repeat="item in ngCtrl.leaveData.name">
+                                            <td>{{item}}</td>
+                                            <td>{{ngCtrl.leaveData.info[$index]}}</td>
+                                            <td>
+                                                <button type="button" class="btn btn-default" ng-click="ngCtrl.setLeaveModifyInfoPage($index)">修改</button>
+                                                <button type="button" class="btn btn-danger" ng-click="ngCtrl.deleteLeaveData($event, $index)">刪除</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <button type="button" class="btn btn-info" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.LEAVE_ADD_PAGE)">新增假別</button>
+                            </md-tab-body>
+                        </md-tab>
+                        <md-tab label="額度管理">
+                            <md-tab-body>
+                                <br><br>
+                                <label for="leaveSearchName">搜尋：</label>
+                                <input type="text" name="leaveSearchName" ng-model="ngCtrl.leaveSearchObj" placeholder="search" />
+                                <br><br>
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">姓名</th>
+                                            <th class="text-center">Email</th>
+                                            <th class="text-center">部門</th>
+                                            <th class="text-center">職稱</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-center">
+                                        <tr ng-repeat="item in ngCtrl.employeesData | filter: ngCtrl.leaveSearchObj track by item._id">
+                                            <td>{{item.name}}</td>
+                                            <td>{{item.email}}@kk.com</td>
+                                            <td>{{item.department}}</td>
+                                            <td>{{item.title}}</td>
+                                            <td><button type="button" class="btn btn-default" ng-click="ngCtrl.setLeaveQuotaViewPage(item.email)">檢視</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </md-tab-body>
+                        </md-tab>
+                    </md-tabs>
+                </section>
+                <!-- leave adding page -->
+                <section ng-show="ngCtrl.showPage(ngCtrl.pageEnum.LEAVE_ADD_PAGE)">
+                    <h1 class="page-header">請假管理 - 新增假別</h1>
+                    <form class="form-horizontal" ng-submit="ngCtrl.addLeaveSubmit()">
+                        <section class="form-group">
+                            <label for="newLeaveName" class="col-md-2 control-label">假別名稱</label>
+                            <section class="col-md-4 input-group">
+                                <input type="text" class="form-control" id="newLeaveName" ng-model="ngCtrl.newLeaveName">
+                            </section>
+                        </section>
+                        <section class="form-group">
+                            <label for="newLeaveInfo" class="col-md-2 control-label">假別說明</label>
+                            <section class="col-md-4 input-group">
+                                <input type="text" class="form-control" id="newLeaveInfo" ng-model="ngCtrl.newLeaveInfo">
+                            </section>
+                        </section>
+                        <section class="form-group">
+                            <label for="newLeaveTotal" class="col-md-2 control-label">假別額度</label>
+                            <section class="col-md-4 input-group">
+                                <input type="number" class="form-control" id="newLeaveTotal" ng-model="ngCtrl.newLeaveTotal">
+                            </section>
+                            <span class="col-md-offset-2">新的假別會直接新增到所有員工的假別資料</span>
+                        </section>
+                        <section class="form-group">
+                            <section class="col-md-2 col-md-offset-2">
+                                <button type="submit" class="btn btn-info" ng-disabled="!ngCtrl.checkAddLeaveSubmit()">新增</button>
+                                <button type="button" class="btn btn-default" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.LEAVE_MAIN_PAGE)">取消</button>
+                            </section>
+                        </section>
+                    </form>
+                </section>
+                <!-- leave modifying page -->
+                <section ng-show="ngCtrl.showPage(ngCtrl.pageEnum.LEAVE_MODIFY_INFO_PAGE)">
+                    <h1 class="page-header">請假管理 - 假別修改</h1>
+                    <form class="form-horizontal" ng-submit="ngCtrl.updateLeaveDataSubmit($event)">
+                        <section class="form-group">
+                            <label for="leaveName" class="col-md-2 control-label">假別名稱</label>
+                            <section class="col-md-4 input-group">
+                                <input type="text" class="form-control" id="leaveName" ng-change="ngCtrl.employeeDataChange()" ng-model="ngCtrl.tmpLeaveData.name[ngCtrl.tmpLeaveIndex]">
+                            </section>
+                        </section>
+                        <section class="form-group">
+                            <label for="leaveInfo" class="col-md-2 control-label">假別說明</label>
+                            <section class="col-md-4 input-group">
+                                <input type="text" class="form-control" id="leaveInfo" ng-change="ngCtrl.employeeDataChange()" ng-model="ngCtrl.tmpLeaveData.info[ngCtrl.tmpLeaveIndex]">
+                            </section>
+                        </section>
+                        <section class="form-group">
+                            <section class="col-md-2 col-md-offset-2">
+                                <button type="submit" class="btn btn-info" ng-disabled="ngCtrl.checkDataChanged()">更新</button>
+                                <button type="button" class="btn btn-default" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.LEAVE_MAIN_PAGE)">取消</button>
+                            </section>
+                        </section>
+                    </form>
+                </section>
+                <!-- leave quota viewing page -->
+                <section ng-show="ngCtrl.showPage(ngCtrl.pageEnum.LEAVE_QUOTA_PAGE)">
+                    <h1 class="page-header">{{ngCtrl.currentEmpLeaveQuota.email}}-請假額度</h1>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th class="text-center">假別</th>
+                                <th class="text-center">總額度</th>
+                                <th class="text-center">已使用</th>
+                                <th class="text-center">剩餘天數</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center">
+                            <tr ng-repeat="item in ngCtrl.leaveData.name">
+                                <td>{{item}}</td>
+                                <td>{{ngCtrl.currentEmpLeaveQuota.total[$index]}}</td>
+                                <td>{{ngCtrl.currentEmpLeaveQuota.used[$index]}}</td>
+                                <td>{{ngCtrl.currentEmpLeaveQuota.total[$index]-ngCtrl.currentEmpLeaveQuota.used[$index]}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button type="button" class="btn btn-info" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.LEAVE_MODIFY_QUOTA_PAGE)">更新</button>
+                    <button type="button" class="btn btn-default" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.LEAVE_MAIN_PAGE)">返回</button>
+                </section>
+                <!-- leave quota modifying page -->
+                <section ng-show="ngCtrl.showPage(ngCtrl.pageEnum.LEAVE_MODIFY_QUOTA_PAGE)">
+                    <h1 class="page-header">{{ngCtrl.currentEmpLeaveQuota.email}}-更新資料</h1>
+                    <form class="form-horizontal" ng-submit="ngCtrl.updateLeaveQuotaSubmit()">
+                        <section class="form-group row" ng-repeat="item in ngCtrl.leaveData.name">
+                            <label class="col-md-1 col-md-offset-1" style="color:blue">{{item}}</label>
+                            <section class="col-md-8">
+                                <label for="leaveTotal" class="control-label col-md-2">總額度</label>
+                                <section class="col-md-2">
+                                    <input type="number" class="form-control" id="leaveTotal" ng-model='ngCtrl.currentEmpLeaveQuota.total[$index]' ng-change="ngCtrl.employeeDataChange()">
+                                </section>
+                                <label for="leaveUsed" class="control-label col-md-2">已使用</label>
+                                <section class="col-md-2">
+                                    <input type="number" class="form-control" id="leaveUsed" ng-model='ngCtrl.currentEmpLeaveQuota.used[$index]' ng-change="ngCtrl.employeeDataChange()">
+                                </section>
+                            </section>
+                            <br><br>
+                            <hr>
+                        </section>
+                        <section class="form-group">
+                            <section class="col-md-2 col-md-offset-4">
+                                <button type="submit" class="btn btn-info" ng-disabled="ngCtrl.checkDataChanged()">更新</button>
+                                <button type="button" class="btn btn-default" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.LEAVE_MAIN_PAGE)">取消</button>
+                            </section>
+                        </section>
+                    </form>
+                </section>
+            </section>
+        </section>
+    </section>
+</body>
+</html>

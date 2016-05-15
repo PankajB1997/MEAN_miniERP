@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html ng-app="myEpaper">
+<head>
+    <%- include header %>
+    <!-- library -->
+    <script src="../components/angular-animate/angular-animate.min.js"></script>
+    <script src="../components/angular-aria/angular-aria.min.js"></script>
+    <script src="../components/angular-material/angular-material.min.js"></script>
+    <script src="../javascript/index.js"></script>
+    <!-- style sheet -->
+    <link rel="stylesheet" href="../components/angular-material/angular-material.min.css">
+</head>
+<body style="padding-top: 2%" ng-controller="EpaperController as ngCtrl">
+    <%- include nav %>
+    <section class="container">
+        <h1 class="page-header text-center">KK&nbsp;&nbsp;E-Paper</h1>
+        <section class="col-md-10 col-md-offset-1" ng-show="ngCtrl.showPage(ngCtrl.pageEnum.MAIN_PAGE)">
+            <h3 class="page-header">我的表單</h3>
+            <h4>
+                <a class="col-md-3" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.ALL_PAGE)">所有表單</a>
+                <a class="col-md-3" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.APPROVED_PAGE)">簽核過表單</a>
+                <a class="col-md-3" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.WAITING_PAGE)">等待被簽核 <span class="badge alert-info">{{ngCtrl.myWaitingEpapers.length}}</span></a>
+                <a class="col-md-3" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.APPROVING_PAGE)">等待我簽核 <span class="badge alert-danger">{{ngCtrl.myApprovingEpapers.length}}</span></a>
+            </h4>
+        </section>
+        <section class="col-md-10 col-md-offset-1" ng-show="ngCtrl.showPage(ngCtrl.pageEnum.ALL_PAGE)">
+                <h3 class="page-header">我送出的所有表單</h3>
+                <section>
+                    <table class="table table-striped">
+                        <thead class="h4">
+                            <tr>
+                                <th class="text-center">類別</th>
+                                <th class="text-center">狀態</th>
+                                <th class="text-center">送出日期</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center h4">
+                            <tr ng-repeat="item in ngCtrl.myAllEpapers">
+                                <td>{{item.type | paperType}}</td>
+                                <td>{{item.status | statusName}}</td>
+                                <td>{{item.date | date: "yyyy-MM-dd"}}</td>
+                                <td>
+                                    <button class="btn btn-info" ng-click="ngCtrl.checkAll($index)">查看</button>
+                                </td>
+                             </tr>
+                        </tbody>
+                    </table>
+                </section>
+                <section class="col-md-1 col-md-offset-5">
+                    <button class="btn btn-default" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.MAIN_PAGE)">返回</button>
+                </section>
+            </section>
+            <section class="col-md-10 col-md-offset-1" ng-show="ngCtrl.showPage(ngCtrl.pageEnum.ALL_EPAPER)">
+                <h3 class="page-header">送出的表單</h3>
+                <section ng-if="ngCtrl.currentEpaper.type == 'leave'">
+                    <%- include leaveTemplate %>
+                    <button type="button" class="btn btn-default" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.ALL_PAGE)">返回</button>
+                </section>
+            </section>
+            <section class="col-md-10 col-md-offset-1" ng-show="ngCtrl.showPage(ngCtrl.pageEnum.APPROVED_PAGE)">
+                <h3 class="page-header">我簽核過的表單</h3>
+                <table class="table table-striped">
+                    <thead class="h4">
+                        <tr>
+                            <th class="text-center">類別</th>
+                            <th class="text-center">送出日期</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center h4">
+                        <tr ng-repeat="item in ngCtrl.myApprovedEpapers">
+                            <td>{{item.type | paperType}}</td>
+                            <td>{{item.date | date: "yyyy-MM-dd"}}</td>
+                            <td>
+                                <button class="btn btn-info" ng-click="ngCtrl.checkApproved($index)">查看</button>
+                            </td>
+                         </tr>
+                    </tbody>
+                </table>
+                <section class="col-md-1 col-md-offset-5">
+                    <button class="btn btn-default" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.MAIN_PAGE)">返回</button>
+                </section>
+            </section>
+            <section class="col-md-10 col-md-offset-1" ng-show="ngCtrl.showPage(ngCtrl.pageEnum.APPROVED_EPAPER)">
+                <h3 class="page-header">簽核過的表單</h3>
+                <section ng-if="ngCtrl.currentEpaper.type == 'leave'">
+                    <%- include leaveTemplate %>
+                    <button type="button" class="btn btn-default" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.APPROVED_PAGE)">返回</button>
+                </section>
+            </section>
+            <section class="col-md-10 col-md-offset-1" ng-show="ngCtrl.showPage(ngCtrl.pageEnum.WAITING_PAGE)">
+                <h3 class="page-header">等待被簽核的表單</h3>
+                <section>
+                    <table class="table table-striped">
+                        <thead class="h4">
+                            <tr>
+                                <th class="text-center">類別</th>
+                                <th class="text-center">狀態</th>
+                                <th class="text-center">送出日期</th>
+                                <th class="text-center">簽核人</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center h4">
+                            <tr ng-repeat="item in ngCtrl.myWaitingEpapers">
+                                <td>{{item.type | paperType}}</td>
+                                <td>簽核中</td>
+                                <td>{{item.date | date: "yyyy-MM-dd"}}</td>
+                                <td>{{item.approver | approver}}</td>
+                                <td>
+                                    <button class="btn btn-info" ng-click="ngCtrl.checkWaiting($index)">查看</button>
+                                </td>
+                             </tr>
+                        </tbody>
+                    </table>
+                </section>
+                <section class="col-md-1 col-md-offset-5">
+                    <button class="btn btn-default" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.MAIN_PAGE)">返回</button>
+                </section>
+            </section>
+            <section class="col-md-10 col-md-offset-1" ng-show="ngCtrl.showPage(ngCtrl.pageEnum.WAITING_EPAPER)">
+                <h3 class="page-header">等待簽核</h3>
+                <section ng-if="ngCtrl.currentEpaper.type == 'leave'">
+                    <%- include leaveTemplate %>
+                    <button type="button" class="btn btn-default" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.WAITING_PAGE)">返回</button>
+                </section>
+            </section>
+            <section class="col-md-10 col-md-offset-1" ng-show="ngCtrl.showPage(ngCtrl.pageEnum.APPROVING_PAGE)">
+                <h3 class="page-header">等待我簽核的表單</h3>
+                <section>
+                    <table class="table table-striped">
+                        <thead class="h4">
+                            <tr>
+                                <th class="text-center">類別</th>
+                                <th class="text-center">狀態</th>
+                                <th class="text-center">送出日期</th>
+                                <th class="text-center">申請人</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center h4">
+                            <tr ng-repeat="item in ngCtrl.myApprovingEpapers">
+                                <td>{{item.type | paperType}}</td>
+                                <td>簽核中</td>
+                                <td>{{item.date | date: "yyyy-MM-dd"}}</td>
+                                <td>{{item.applicant}}</td>
+                                <td>
+                                    <button class="btn btn-info" ng-click="ngCtrl.checkApproving($index)">查看</button>
+                                </td>
+                             </tr>
+                        </tbody>
+                    </table>
+                </section>
+                <section class="col-md-1 col-md-offset-5">
+                    <button class="btn btn-default" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.MAIN_PAGE)">返回</button>
+                </section>
+            </section>
+            <section class="col-md-10 col-md-offset-1" ng-show="ngCtrl.showPage(ngCtrl.pageEnum.APPROVING_EPAPER)">
+                <h3 class="page-header">簽核</h3>
+                <section ng-if="ngCtrl.currentEpaper.type == 'leave'">
+                    <form class="form-horizontal" ng-submit="ngCtrl.approveEpapreSubmit()">
+                        <%- include leaveTemplate %>
+                        <button type="submit" class="btn btn-info">核准</button>
+                        <button type="button" class="btn btn-danger" ng-click="ngCtrl.rejectEpapre()">駁回</button>
+                        <button type="button" class="btn btn-default" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.APPROVING_PAGE)">返回</button>
+                    </form>
+                </section>
+            </section>
+        </section>
+    </section>
+</body>
+</html>

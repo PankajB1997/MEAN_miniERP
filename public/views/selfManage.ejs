@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html ng-app='mySelfManage'>
+<head>
+    <%- include header %>
+    <!-- library -->
+    <script src="../components/angular-animate/angular-animate.min.js"></script>
+    <script src="../components/angular-aria/angular-aria.min.js"></script>
+    <script src="../components/angular-messages/angular-messages.min.js"></script>
+    <script src="../components/angular-material/angular-material.min.js"></script>
+    <script src="../components/moment/min/moment.min.js"></script>
+    <script src="../components/angular-md5/angular-md5.min.js"></script>
+    <script src="../javascript/selfManage.js"></script>
+    <!-- style sheet -->
+    <link rel="stylesheet" href="../components/angular-material/angular-material.min.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body ng-controller="ManageController as ngCtrl">
+    <%- include nav %>
+    <section class="container-fluid">
+        <!-- sidebar -->
+        <section class="col-md-2 text-center sidebar">
+            <section class="nav nav-sidebar">
+                <li><a href="" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.OVERVIEW_PAGE)">基本資料</a></li>
+                <li><a href="" ng-click="ngCtrl.setPage(ngCtrl.pageEnum.ACCOUNT_PAGE)">帳號管理</a></li>
+            </section>
+        </section>
+        <!-- main part -->
+        <section class="col-md-9 col-md-offset-2 main">
+            <!-- overview page -->
+            <section ng-show="ngCtrl.showPage(ngCtrl.pageEnum.OVERVIEW_PAGE)">
+                <h1 class="page-header">基本資料</h1>
+                <h4>
+                    <ul>
+                        <li style="margin: 20px 0">Email: {{ngCtrl.myData.email}}@kk.com</li>
+                        <li style="margin: 20px 0">部門: {{ngCtrl.myData.department}}</li>
+                        <li style="margin: 20px 0">職稱: {{ngCtrl.myData.title}}</li>
+                        <li style="margin: 20px 0">到職日: {{ngCtrl.myData.onBoardDate | date: "yyyy-MM-dd"}}</li>
+                    </ul>
+                </h4>
+            </section>
+            <!-- account management -->
+            <section ng-show="ngCtrl.showPage(ngCtrl.pageEnum.ACCOUNT_PAGE)">
+                <!-- account main page -->
+                <section ng-show="ngCtrl.showPage(ngCtrl.pageEnum.ACCOUNT_MAIN_PAGE)">
+                    <h1 class="page-header">帳號管理</h1>
+                    <md-tabs md-selected="ngCtrl.leaveViewIdx" md-align-tabs="top" md-dynamic-height="">
+                        <md-tab label="修改密碼">
+                            <md-tab-body>
+                                <br><br>
+                                <form class="form-horizontal" ng-submit="ngCtrl.changePw($event)">
+                                    <section class="form-group">
+                                        <label for="oldPw" class="col-md-2 control-label">舊密碼 :</label>
+                                        <section class="col-md-2 input-group">
+                                            <input type="password" class="form-control" id="oldPw" placeholder="舊密碼" ng-model="ngCtrl.oldPw">
+                                        </section>
+                                    </section>
+                                    <section class="form-group">
+                                        <label for="newPw" class="col-md-2 control-label">新密碼 :</label>
+                                        <section class="col-md-2 input-group">
+                                            <input type="password" class="form-control" id="newPw" placeholder="新密碼" ng-model="ngCtrl.newPw">
+                                        </section>
+                                    </section>
+                                    <section class="form-group">
+                                        <label for="checkPw" class="col-md-2 control-label">確認新密碼 :</label>
+                                        <section class="col-md-2 input-group">
+                                            <input type="password" class="form-control" id="checkPw" placeholder="再輸入一次新密碼" ng-model="ngCtrl.checkPw">
+                                        </section>
+                                    </section>
+                                    <section class="form-group">
+                                        <section class="col-md-2 col-md-offset-1">
+                                            <button type="submit" class="btn btn-info" ng-disabled="!ngCtrl.checkPwChanged()">修改</button>
+                                        </section>
+                                    </section>
+                                </form>
+                            </md-tab-body>
+                        </md-tab>
+                    </md-tabs>
+                </section>
+            </section>
+        </section>
+    </section>
+</body>
+</html>
